@@ -1,0 +1,1168 @@
+名称
+    dnf - DNF Command Reference （全称Dandified yum）
+
+概要
+    dnf [options] <command> [<args>...]
+
+#常用用法
+    安装 httpd 包，对交互式自动回答 yes
+    #dnf -y install httpd
+
+    安装模块并启用 streams
+    #dnf install '@docker'
+
+    安装本地 rpm 包，相关依赖会自动安装
+    #dnf localinstall httpd    #不推荐
+    #dnf install /usr/bin/httpd*    #指定软件包本地位置，会自动安装相关依赖
+
+    查看可安装的软件
+    #dnf search httpd
+
+    卸载 httpd 包
+    #dnf remove httpd
+
+    查看 httpd 信息，默认从数据库查询，不会更新元数据
+    #dnf info httpd
+
+    查看软件包是否有更新，若不指定包，则查看系统所有包是否有更新
+    #dnf check-update
+    #dnf list --upgrades
+
+    列出已经安装的所有软件包
+    #dnf list --installed
+
+    列出源中所有可用安装包，可与 | 管道命令配合使用
+    #dnf list --all | grep httpd
+
+    清除元数据和所有缓存包
+    #dnf clean all
+
+    查看 dnf 历史执行命令
+    #dnf history
+
+    更新所有源存储库的元数据
+    #dnf makecache
+
+    查看提供指定名命令的软件包
+    #dnf provides httpd    #查看提供 httpd 命令的软件包
+
+    重新安装软件包，若系统没有安装该软件包，会自动下载安装
+    #dnf reinstall httpd
+
+    列出所有源存储库
+    #dnf repolist --all
+
+    开启/关闭 存储库源
+    #dnf --disable config-manager base-debuginfo    #关闭 base-debuginfo 仓库
+    #dnf --enable config-manager base-debuginfo    #开启 base-debuginfo 仓库
+
+    下载指定的软件包，不进行安装
+    #dnf --downloadonly --downloaddir=/root/download httpd
+#
+    
+描述
+    DNF是YUM的下一代主要版本的包管理器，YUM是基于RPM的linux发行版的包管理器。它保持了CLI与YUM的兼容性，并为扩展那和插件定义了严格的API插件可以修改或扩展DNF的功能，或者在以下提到的命令之上提供其他CLI命令。 如果知道这样一个命令的名称（包括下面提到的命令），则可以使用dnf-command（<alias>）形式的适当虚拟提供来找到/安装提供该命令的软件包，其中<alias>是 命令名称； 例如``dnf install'dnf-command（versionlock）'''安装一个ver-sionlock插件。 此方法也适用于指定需要特定DNF命令的程序包的依赖关系。
+
+  Available commands:
+
+    · alias
+    · autoremove
+    · check
+    · check-update
+    · clean
+    · distro-sync
+    · downgrade
+    · group
+    · help
+    · history
+    · info
+    · install
+    · list
+    · makecache
+    · mark
+    · module
+    · provides
+    · reinstall
+    · remove
+    · repoinfo
+    · repolist
+    · repoquery
+    · repository-packages
+    · search
+    · shell
+    · swap
+    · updateinfo
+    · upgrade
+    · upgrade-minimal
+    · upgrade-to
+
+  Additional information:
+    · Options
+    · Specifying Packages
+    · Specifying Exact Versions of Packages
+    · Specifying Provides
+    · Specifying Groups
+    · Specifying Transactions
+    · Metadata Synchronization
+    · Configuration Files Replacement Policy
+    · Files
+    · See Also
+
+OPTIONS(选项)：
+    -4
+        仅解析为IPv4地址。
+
+    -6
+        仅解析为IPv6地址。
+
+    --advisory=<advisory>, --advisories=<advisory>
+        包括与咨询ID（例如FEDORA-2201-123）相对应的软件包。 适用于安装，重新查询，更新信息和升级命令。 
+
+    --allowerasing
+        允许擦除已安装的软件包以解决依赖关系。此选项可以用作未明确定义要删除的软件包的yum swap命令。
+
+    --assumeno
+        对所有问题自动回答“NO”。
+
+    -b, --best
+        在交易中尝试最佳的可用软件包版本。 特别是在dnf升级期间（默认情况下会跳过由于依赖关系而无法安装的更新），此开关强制DNF仅考虑最新的软件包。 当运行到依赖项已损坏的程序包时，DNF将失败，并说明无法安装最新版本的原因。
+
+    --bugfix
+        包括可修复错误修正问题的软件包。 适用于安装，repoquery，updateinfo和升级命令。
+
+    --bz=<bugzilla>, --bzs=<bugzilla>
+        包括用于修复Bugzilla ID的软件包。例如：123123.适用于install，repoquery，updateinfo和upgrade命令。
+
+    -C, --cacheonly
+        完全从系统缓存运行，即使缓存过期也不要更新并使用它。
+
+        DNF为执行它的每个用户使用一个单独的缓存。root用户的缓存称为系统缓存。 此开关允许常规用户对系统缓存进行只读访问，该访问通常比用户更新鲜，因此，他不必等待元数据同步。
+
+    --color=<color>
+        控制是否在终端输出中使用颜色。 有效值始终为，从不为自动（默认）。
+
+    --comment=<comment>
+        在交易记录中添加评论。
+
+    --cve=<cves>, --cves=<cves>
+        包括用于修复CVE（常见漏洞和披露）ID（http://cve.mitre.org/about/）的软件包。 CVE-2201-0123。 适用于安装，repoquery，updateinfo和升级命令。
+
+    -d <debug level>, --debuglevel=<debug level>
+        调试输出级别。 这是一个介于0（无附加信息字符串）和10（显示所有调试信息，即使用户无法理解的调试信息）之间的整数值，默认值为2。不建议使用，而是使用-v。
+
+    --debugsolver
+        将帮助进行依赖项求解器调试的数据转储到./debug-data中。
+
+    --disableexcludes=[all|main|<repoid>],               --disableexcludep‐
+    kgs=[all|main|<repoid>]
+    禁用配置文件排除。 采用以下三个选项之一：
+    ·全部，禁用所有配置文件，排除
+        ·main，禁用[main]部分中定义的排除项
+        ·Repoid，禁用为给定存储库定义的排除
+
+    --disable, --set-disabled
+    禁用指定的存储库（自动保存）。 该选项必须与config-manager命令（dnf-plugins-core）一起使用。
+
+    --disableplugin=<plugin names>
+        禁用列出的由名称或全局名称指定的插件。
+
+    --disablerepo=<repoid>
+        通过id或glob禁用特定的存储库。 此选项与--repo互斥。
+
+    --downloaddir=<path>, --destdir=<path>
+        将下载的软件包重定向到提供的目录。 该选项必须与--downloadonly命令行选项，下载命令（dnf-plugins-core）或系统升级命令（dnf-plugins-extras）一起使用。
+
+    --downloadonly
+        下载已解决的软件包集，而不执行任何rpm事务（安装/升级/擦除）。
+
+    -e <error level>, --errorlevel=<error level>
+        错误输出级别。 这是介于0（无错误输出）和10（显示所有错误消息）之间的整数值，默认值为3。不建议使用，而是使用-v。
+
+    --enable, --set-enabled
+        启用指定的存储库（自动保存）。 该选项必须与config-manager命令（dnf-plugins-core）一起使用。
+
+    --enableplugin=<plugin names>
+        启用按名称或全局名称指定的列出的插件。
+
+    --enablerepo=<repoid>
+        通过ID或Glob启用其他存储库。
+
+    --enhancement
+        包括与增强功能相关的软件包。 适用于install，repoquery，updateinfo和upgrade命令。
+
+    -x <package-spec>, --exclude=<package-spec>
+        从操作中排除<package-spec>指定的软件包。
+
+    --excludepkgs=<package-spec>
+        不推荐使用的选项。 它由--exclude选项代替。
+
+    --forcearch=<arch>
+        强制使用体系结构。 可以指定任何体系结构。 但是，使用CPU本身不支持的体系结构将需要某种形式的仿真。 通常是通过QEMU。 可以通过分别使用值<arch>和True的arch和ignorearch配置选项来配置--forcearch的行为。
+
+    -h, --help, --help-cmd
+        显示帮助
+
+    --installroot=<path>
+        指定相对于所有软件包安装位置的替代installroot。 可以将其视为chroot <root> dnf，除了使用--installroot允许dnf在创建chroot之前起作用。 它需要绝对路径。
+
+        cachedir，日志文件，releasever和gpgkey取自或存储在installroot中。 Gpgkey从相对于主机的路径导入到installroot中，该路径可以在配置文件的存储库部分中指定。
+        首先在installroot内部搜索配置文件和reposdir。 如果不存在，则从主机系统获取它们。 注意：如果在命令行参数中指定了路径（对于配置文件，则为--config = <配置文件>；对于reposdir为--setopt = reposdir = <reposdir>），则该路径始终相对于主机，而没有 例外。
+
+        pluginpath和pluginconfpath是相对于主机的。 注意：创建安装根目录时，您可能还希望使用命令行选项--relea‐sever = <release>，否则$ relea-sever值将从安装根目录下的rpmdb中获取（因此，在 如果使用--releasever = /，则会从主机（/）系统中检测到releasever。 创建时的新installroot路径不包含存储库，releasever和dnf.conf文件。
+
+        在模块化系统上，您可能还需要在创建installroot时使用--setopt = mod-ule_platform_id = <module_platform_name：stream>命令行选项，否则module_platform_id值将从内部的/ etc / os-release文件中获取 installroot（因此在创建时它将为空，可能无法满足模块化依赖关系，并且可以排除模块内容）。
+
+
+Installroot examples:
+    dnf --installroot=<installroot> --releasever=<release> install  sys‐tem-release
+        将<installroot>目录中的系统的发行版永久设置为<release>。
+
+    dnf  --installroot=<installroot>  --setopt=reposdir=<path>  --config /path/dnf.conf upgrade
+        使用/path/dnf.conf中的配置，从--setopt描述的存储库中升级installroot内部的软件包。
+
+    --newpackage
+        包括与新程序包相关的程序包。 适用于安装，repoquery，updateinfo和升级命令。
+
+    --noautoremove
+        禁用删除不再使用的依赖项。 它将clean_requirements_on_remove配置选项设置为False。
+
+    --nobest
+        将“最佳选项”设置为“假”，这样交易就不仅限于最佳候选者。
+
+    --nodocs
+        不要安装文档。 设置rpm标志'RPM- TRANS_FLAG_NODOCS'。
+
+    --nogpgcheck
+        跳过检查软件包上的GPG签名（如果RPM策略允许）。
+
+    --noplugins
+        禁用所有插件。
+
+    --obsoletes
+        此选项对安装/更新有影响，它启用dnf的过时处理逻辑。 有关更多信息，请参见obsoletes选项。
+
+        此选项还显示与repoquery命令一起使用时软件包已过时的功能。
+
+        配置选项：已淘汰
+
+    -q, --quiet
+        结合非交互式命令，仅显示相关内容。 禁止显示有关DNF当前状态或操作的消息。
+
+    -R <minutes>, --randomwait=<minutes>
+        最大命令等待时间。
+
+    --refresh
+        在运行命令之前，将元数据设置为过期。
+
+    --releasever=<release>
+        将DNF配置为发行版本为<release>。 这可能会影响缓存路径，配置文件中的值和镜像列表URL。
+
+    --repofrompath <repo>,<path/url>
+        指定存储库的路径或URL（与baseurl中的路径相同）以添加到此查询的存储库中。 此选项可以多次使用。 存储库的存储库标签由<repo>指定。 如果只想查看此存储库中的软件包，请将其与--repo = <repo>或--disablerepo =“ *”开关结合使用。 存储库的存储库标签由<repo>指定。 可以使用--setopt = <repo>。<option> = <value>来调整存储库的配置。
+
+    --repo=<repoid>, --repoid=<repoid>
+        通过ID或Glob仅启用特定的存储库。 可累积使用多次。 它基本上是--disablerepo =“ *” --enablerepo = <repoid>的快捷方式，并且与--disablerepo选项互斥。
+
+    --rpmverbosity=<name>
+        RPM调试脚本输出级别。 将RPM脚本集的调试级别设置为<名称>。 有关可用级别，请参见rpmverbosity配置选项。
+
+    --sec-severity=<severity>, --secseverity=<severity>
+        包括提供针对特定严重性问题的修复程序的软件包。 适用于安装，重新查询，更新信息和升级命令。
+
+    --security
+        包括提供安全问题修复程序的软件包。适用于upgrade命令。
+
+    --setopt=<option>=<value>
+        覆盖配置文件中的配置选项。 要覆盖存储库的配置选项，请对<option>使用repoid.option。 配置选项的值（例如excludepkgs，includepkgs，installonlypkgs和tsflags）将附加到原始值，但不会覆盖它。 但是，如果指定一个空值（例如--setopt = tsflags =），则会清除该选项。
+
+    --skip-broken
+        通过删除在事务中引起问题的软件包来解决解决问题。 它是严格配置选项的别名，值为False。 此外，使用enable和disable模块子命令，即使在模块依赖关系损坏的情况下，也可以执行操作。
+
+    --showduplicates
+        在存储库中显示重复的软件包。 适用于列表和搜索命令。
+
+    -v, --verbose
+        详细操作，显示调试消息。
+
+    --version
+        显示DNF版本并退出。
+
+    -y, --assumeyes
+        对所有问题自动回答“是”。
+
+    列表选项以逗号分隔。 命令行选项会覆盖配置文件中的相应设置。
+
+
+COMMANDS（命令）
+    有关<package-spec>和<package-name-spec>的说明，请参阅指定软件包。
+
+    有关<package-nevr-spec>的说明，请参阅指定软件包的确切版本。
+
+    有关<provide-spec>的说明，请参见指定提供。
+
+    有关<group-spec>的说明，请参见指定组。
+
+    有关<module-spec>的说明，请参见指定模块。
+
+    有关<transaction-spec>的说明，请参见指定事务。
+
+
+Alias Command（Alias 命令）
+    允许用户定义和管理别名列表（格式为<name = value>），然后可以将其用作dnf命令以缩写较长的命令序列。 有关使用alias命令的示例，请参见别名示例。 有关别名处理的示例，请参见别名处理示例。
+
+    要使用别名（名称=值），必须将名称放置为第一个“命令”（例如，不是选项的第一个参数）。 然后将其替换为其值，并再次在结果序列中搜索别名。 当第一个找到的命令不是任何别名的名称时，别名处理将停止。
+
+    此外，就像在外壳别名中一样，如果结果以\开头，则别名处理将停止。
+
+    所有别名都在[aliases]节的/etc/dnf/aliases.d/目录中的配置文件中定义，并且由alias命令创建的别名被写入USER.conf文件。 （可选）在[main]部分中有启用的选项，默认为True。 可以在相应文件中分别为每个文件设置此名称，也可以在ALIASES.conf文件中为所有别名设置全局名称。
+
+    dnf alias [options] [list] [<name>...]
+        列出别名及其最终结果。 [<alias> ...]参数进一步将结果限制为仅与之匹配的别名。
+
+    dnf alias [options] add <name=value>...
+        创建新的别名。
+
+    dnf alias [options] delete <name>...
+        删除alias
+
+
+Alias Examples
+    dnf alias list
+        列出所有定义的别名。
+
+    dnf alias add rm=remove
+        添加新的别名命令“ rm”，该别名命令与命令“ remove”相同。
+
+    dnf   alias  add  update="\update  --skip-broken  --disableexcludes=all--obsoletes"
+        添加名为“ update”的新别名命令，该命令与命令“ update”具有相同的功能，但选项--skip-broken --dis‐ableexcludes = all --obsoletes。
+
+    Alias Processing Examples
+        如果在in = install和FORCE =“-skip-broken --dis-ableexcludes = all”中定义了别名：
+
+    ·dnf FORCE中的内容将替换为dnf --skip-broken --disableexcludes = all install
+
+    ·FORCE中的dnf将被dnf install FORCE替换（这将失败）
+
+    如果在= install中定义了别名：
+
+    ·dnf in将被替换为dnf install
+
+    ·中的dnf --repo更新将替换为中的dnf --repo更新（将失败）
+
+
+Auto Remove Command
+    dnf [options] autoremove
+        从系统中删除最初作为用户安装的软件包的依赖项安装的所有“叶”软件包，但此类软件包不再需要它们。
+
+        installonlypkgs中列出的软件包永远不会通过此命令自动删除。
+
+    dnf [options] autoremove <spec>...
+        这是Clean_require‐ments_on_remove设置为True的Remove Command命令的别名。 它从系统中删除指定的软件包以及所有软件包，具体取决于要删除的软件包。 每个<spec>可以是直接指定软件包的<package-spec>，也可以是@ <group-spec>，后者指定包含该软件包的（环境）组。 它还删除不再需要的任何依赖项。
+
+        还有一些特定的autoremove命令autoremove -n，autoremove -na和autoremove-nevra允许以NEVRA（name-epoch：version-release.architec-ture）格式指定确切的参数。
+
+        默认情况下，此命令不会强制同步过期的元数据。 另请参见元数据同步。
+
+
+Check Command
+    dnf   [options]  check  [--dependencies]  [--duplicates]  [--obsoleted] [--provides]
+        检查本地packagedb并生成有关其发现的任何问题的信息。 您可以使用--dependencies，--duplicates，--obsoleted和--provides选项来限制要执行的检查（默认是检查所有内容）。
+
+
+Check-Update Command
+    dnf [options] check-update [--changelogs] [<package-specs>...]
+        非交互检查指定软件包的更新是否可用。 如果没有给出<package-specs>，请检查系统是否有可用的更新。 如果有可用的更新，则DNF退出代码将为100，并且将打印更新列表；如果没有更新，则输出0；如果发生错误，则为1。 如果指定了--changelogs选项，则还将打印即将更新的软件包的changelog增量。
+
+        请注意，为安装的软件包提供特定的较新版本（并由check-update报告）并不意味着随后的dnf升级将安装它。 区别在于dnf升级具有要考虑的限制（例如满足软件包依赖性）。
+
+        输出受autocheck_running_kernel配置选项的影响。
+
+
+Clean Command
+    执行为存储库保留的临时文件的清理。 这包括从禁用或删除的存储库以及不同发行版本中遗留的任何此类数据。
+
+    dnf clean dbcache
+        删除从存储库元数据生成的缓存文件。 这将强制DNF在下次运行时重新生成缓存文件。
+
+    dnf clean expire-cache
+        标记存储库元数据已过期。 下次使用DNF时，它将为每个存储库重新验证缓存。
+
+    dnf clean metadata
+        删除存储库元数据。 这些是DNF用于确定程序包的远程可用性的文件。 使用此选项将使DNF在下次运行时下载所有元数据。
+
+    dnf clean packages
+        从系统中删除所有缓存的软件包。
+
+    dnf clean all
+        执行以上所有操作。
+
+
+Distro-Sync command(发行同步命令)
+    dnf distro-sync [<package-spec>...]
+        作为必要的升级，请降级或保留所选的已安装软件包，以匹配任何已启用存储库中可用的最新版本。 如果未提供任何软件包，则将考虑所有已安装的软件包。
+
+        另请参阅配置文件替换策略。
+
+
+Distribution-Synchronization command
+    dnf distribution-synchronization
+        Distro-Sync命令不建议使用的别名。
+
+
+Downgrade Command
+    dnf [options] downgrade <package-installed-specs>...
+        如果可能，将指定的软件包降级为所有已知较低版本的最高可安装软件包。 如果给出了版本并且低于已安装的软件包的版本，则它将降级为目标版本。
+
+
+Erase Command
+    dnf [options] erase <spec>...
+        删除命令的别名已弃用。
+
+
+Group Command
+    组是软件包的虚拟集合。 DNF会跟踪用户选择（“标记”）的用户安装的组，并可以使用简单的命令来操作通用的软件包。
+
+    dnf [options] group [summary] <group-spec>
+        显示已安装和可用组的概述。 使用规格，将输出限制为匹配的组。 summary是缺省的groups子命令。
+
+    dnf [options] group info <group-spec>
+        显示组的软件包列表。 当使用-v时，显示哪些软件包已安装或可从存储库中获得。
+
+    dnf [options] group install [--with-optional] <group-spec>...
+        将指定的组标记为已安装，然后安装其中包含的软件包。 如果指定了--with-optional，还包括该组的可选软件包。 如有可能，将安装所有必需和默认软件包。 如果满足条件包，则将安装它们。 如果已经（部分）安装了该组，则该命令将安装该组中缺少的软件包。
+
+    dnf [options] group list <group-spec>...
+        列出所有已匹配组或已安装组或可用组中的所有组。 如果未指定任何内容，请列出所有已知组。 --installed和--available选项缩小了请求列表的范围。 记录由comps.xml文件中定义的display_order标记排序。 使用选项--hidden提供所有隐藏组的列表。 使用-v选项时提供更多详细信息。
+
+    dnf [options] group remove <group-spec>...
+        将组标记为已删除，然后从系统中删除该组中不属于另一个已安装组并且未被用户明确安装的那些软件包。
+
+    dnf [options] group upgrade <group-spec>...
+        从组中升级软件包并升级组本身。 后者包括安装通过分发添加到组中的程序包，以及删除从组中删除的，直到用户未明确安装的程序包。
+
+    组也可以标记为已安装或已删除，而无需实际操作任何软件包：
+
+    dnf [options] group mark install <group-spec>...
+        将指定的组标记为已安装。 此命令将不会安装任何软件包，但随后会将该组视为已安装。
+
+    dnf [options] group mark remove <group-spec>...
+        将指定的组标记为已删除。 此命令不会删除任何软件包。
+
+        另请参阅配置文件替换策略。
+
+    
+Groups Command
+    dnf [options] groups
+        组命令已弃用的别名。
+
+
+Help Command
+    dnf help [<command>]
+        显示所有命令的帮助文本。 如果给出命令名称，则仅显示该特定命令的帮助。
+
+
+History Command
+    使用history命令，用户可以查看过去交易中发生的情况，并根据此信息进行操作（假设设置了his_tory_record配置选项）。
+
+    dnf history [list] [<spec>...]
+        默认历史记录操作是在表中列出有关给定交易的信息。 每个<spec>可以是直接指定交易的<transac-tion-spec>，也可以是指定交易范围的<trans-action-spec> .. <transaction-spec>或<package -name-spec>，它指定由其处理的软件包进行的交易。 如果未指定任何事务，请列出所有已知事务。
+
+    dnf history info [<spec>...]
+        描述给定的交易。 <spec>的含义与“历史记录列表命令”中的含义相同。 如果未指定任何事务，请描述最新事务期间发生的情况。
+
+    dnf history redo <transaction-spec>|<package-name-spec>
+        重复指定的事务。 如果为给定的<package-name-spec>找到了多个事务，则使用最后一个事务（具有最高ID）。 如果由于RPMDB的当前状态而无法重做某些操作，则不会重做事务。
+
+    dnf history rollback <transaction-spec>|<package-name-spec>
+        撤消在指定事务之后执行的所有事务。 如果为给定的<package-name-spec>找到了多个事务，则使用最后一个事务（具有最高ID）。 如果由于RPMDB的当前状态而无法撤消某些事务，则不会撤消任何事务。
+
+    dnf history undo <transaction-spec>|<package-name-spec>
+        执行与指定事务中执行的所有操作相反的操作。 如果为给定的<pack-age-name-spec>找到了多个事务，则使用最后一个事务（具有最高ID）。 如果由于RPMDB的当前状态而无法撤消某些操作，则不会撤消事务。
+
+    dnf history userinstalled
+        显示所有installonly软件包，安装在DNF之外的软件包以及未安装为依赖项的软件包。 即 它列出了执行自动删除命令或删除命令以及将clean_requirements_on_remove配置选项设置为True时将保留在系统上的软件包。 请注意，使用dnf repoquery --userinstalled可以实现相同的结果，并且repo-query命令在输出格式方面更强大。
+
+    默认情况下，此命令不会强制同步过期的元数据，但重做，回滚和撤消子命令除外。 另请参阅元数据同步和配置文件替换策略。
+
+
+Info Command
+    dnf [options] info [<package-name-spec>...]
+        列出有关已安装和可用软件包的描述和摘要信息。
+
+    默认情况下，此命令不会强制同步过期的元数据。 另请参见元数据同步。
+
+
+Install Command
+    dnf [options] install <spec>...
+        确保给定的软件包及其依赖项已安装在系统上。 每个<spec>可以是<package-spec>或@ <module-spec>或@ <group-spec>。 请参阅安装示例。 如果无法（并且尚未）安装给定的软件包或提供，则退出代码将为非零。 如果<spec>与@ <module-spec>和@ <group-spec>都匹配，则仅安装模块。
+
+    当给出<package-spec>来指定软件包的确切版本时，无论已经安装了哪个版本的软件包，DNF都会安装所需的版本。 如果是非仅安装软件包，则将删除该软件包的旧版本。
+
+    还有一些特定的安装命令install-n，install-na和install-nevra允许使用NEVRA格式指定确切的参数。
+
+    另请参阅配置文件替换策略。
+
+
+Install Examples
+    dnf install tito
+        安装tito软件包（tito是软件包名称）。
+
+    dnf install ~/Downloads/tito-0.6.2-1.fc22.noarch.rpm
+        从〜/ Downloads /目录安装本地rpm文件tito-0.6.2-1.fc22.noarch.rpm。
+
+    dnf install tito-0.5.6-1.fc22
+        安装具有特定版本的软件包。 如果已安装该软件包，它将自动尝试降级或升级到特定版本。
+
+    dnf --best install tito
+        安装软件包的最新可用版本。 如果该软件包已经安装，它将尝试自动升级到最新版本。 如果无法安装该软件包的最新版本，则安装将失败。
+
+    dnf install vim
+        DNF将自动识别vim不是软件包名称，但会查找并安装一个为vim提供所有必需依赖项的软件包。 注意：程序包名称匹配优先于程序包提供匹配。
+
+    dnf install https://kojipkgs.fedoraproject.org//pack‐ages/tito/0.6.0/1.fc22/noarch/tito-0.6.0-1.fc22.noarch.rpm
+        直接从URL安装软件包。
+
+    dnf install '@docker'
+        安装模块'docker'的所有默认配置文件及其RPM，相应地启用模块流。
+
+    dnf install '@Web Server'
+        安装“ Web服务器”环境组。
+
+    dnf install /usr/bin/rpmsign
+        安装提供/ usr / bin / rpmsign文件的软件包。
+
+    dnf -y install tito --setopt=install_weak_deps=False
+        安装tito程序包（tito是程序包名称），不要过分弱。 软件包的核心功能不需要弱小部门，但可以增强原始软件包（如扩展的文档，插件，附加功能等）。
+
+    dnf install --advisory=FEDORA-2018-b7b99fe852 \*
+        安装属于“ FEDORA-2018-b7b99fe852”咨询的所有软件包。
+
+
+List Command
+        根据软件包与系统的关系来打印软件包列表。 如果某个软件包存在于RPMDB中，则将安装该软件包；如果未安装但存在于DNF所知道的存储库中，则可以使用该软件包。 list命令还可以根据特定条件限制显示的包装数量，例如 仅适用于更新已安装软件包的软件包。 配置文件中的exclude选项可以影响结果，但是如果使用--disableexcludes命令行选项，则可以确保列出所有已安装的软件包。
+
+    所有形式都采用[<package-specs> ...]参数，以进一步将结果限制为仅与之匹配的软件包。
+
+    dnf [options] list [--all] [<package-name-specs>...]
+        列出RPMDB中，存储库中或同时存在于两者中的所有软件包。
+
+    dnf [options] list --installed [<package-name-specs>...]
+        Lists installed packages.
+
+    dnf [options] list --available [<package-name-specs>...]
+        列出可用的软件包。
+
+    dnf [options] list --extras [<package-name-specs>...]
+        列出附加项，即系统上安装的在任何已知存储库中都不可用的软件包。
+
+    dnf [options] list --obsoletes [<package-name-specs>...]
+        列出系统上安装的所有已知存储库中的软件包已废弃的软件包。
+
+    dnf [options] list --recent [<package-name-specs>...]
+        列出最近添加到存储库中的软件包。
+
+    dnf [options] list --upgrades [<package-name-specs>...]
+        列出可用于已安装软件包的升级。
+
+    dnf [options] list --autoremove
+        列出将被dnf autoremove命令删除的软件包。
+
+        默认情况下，此命令不会强制同步过期的元数据。 另请参见元数据同步。
+
+
+Localinstall Command
+    dnf [options] localinstall <spec>...
+        不推荐使用的安装命令别名。
+
+
+Makecache Command
+    dnf [options] makecache
+        下载并缓存所有已知存储库的元数据。 尝试避免尽可能地下载（例如，当本地元数据尚未过期或元数据时间戳未更改时）。
+
+    dnf [options] makecache --timer
+        就像普通的makecache一样，但它指示DNF更加了解资源，这意味着如果使用电池供电，它将不执行任何操作，如果在上一次成功的makecache运行之后过早，它将立即终止（请参阅dnf.conf（5），meta- data_timer_sync）。
+
+
+Mark Command
+    dnf mark install <package-specs>...
+        将指定的软件包标记为由用户安装。 如果安装了任何软件包作为依赖项，并且希望在执行自动删除命令或删除命令以及将clean_requirements_on_remove配置选项设置为True时保留在系统上，则这将很有用。
+
+    dnf mark remove <package-specs>...
+        取消将指定的软件包标记为由用户安装。 只要您作为用户不需要特定的程序包，就可以将其标记为删除。 该程序包保持安装在系统上，但是在执行“自动删除命令”或“删除命令”以及clean_requirements_on_remove配置选项设置为True时将被删除。 如果不确定该软件包是否是系统上其他用户安装的软件包所必需的，则应使用此操作代替“删除命令”。
+
+    dnf mark group <package-specs>...
+        将指定的软件包标记为按组安装。 如果将任何软件包安装为依赖项或用户，并且希望像组删除期间一样被保护并作为组成员进行处理，这将很有用。
+
+Module Command
+    模块子命令使用<module-spec> ...参数指定模块或配置文件。
+
+    dnf [options] module install <module-spec>...
+        安装模块配置文件，包括其软件包。 如果未提供配置文件，则将安装所有默认配置文件。 模块流将相应启用。
+
+        该命令不能用于切换模块流。 建议从模块中删除所有已安装的内容，然后使用reset命令重置模块。 重置模块后，可以安装另一个流。
+
+    dnf [options] module update <module-spec>...
+        更新与活动模块流关联的软件包，可以选择将其限制为概要文件。 如果提供了profile_name，则仅更新该概要文件引用的软件包。
+
+    dnf [options] module remove <module-spec>...
+        删除已安装的模块配置文件，包括其软件包。 如果未提供配置文件，则将删除所有已安装的配置文件。
+
+    dnf [options] module enable <module-spec>...
+        启用模块流，并使流RPM在软件包集中可用。
+
+        解析模块依赖，检查依赖并递归启用。 如果出现模块依赖性问题，将拒绝该操作。 无论如何要执行该操作，请使用--skip-broken选项。
+
+        该命令不能用于切换模块流。 建议从模块中删除所有已安装的内容，然后使用reset命令重置模块。 重置模块后，可以启用其他流。
+
+    dnf [options] module disable <module-name>...
+        禁用模块。 所有相关的模块流将不可用。 如果出现模块依赖性问题，将拒绝该操作。 无论如何要执行该操作，请使用--skip-broken选项。
+
+    dnf [options] module reset <module-name>...
+        重置模块状态，使其不再启用或禁用。
+
+    dnf [options] module list [--all] [module_name...]
+        列出所有模块流，它们的配置文件和状态（启用，禁用，默认）。
+
+    dnf [options] module list --enabled [module_name...]
+        列出已启用的模块流。
+
+    dnf [options] module list --disabled [module_name...]
+        列出禁用的模块流。
+
+    dnf [options] module list --installed [module_name...]
+        列出具有已安装配置文件的模块流。
+
+    dnf [options] module info --profile <module-spec>...
+        打印有关给定模块配置文件的详细信息。
+
+Provides Command
+    dnf [options] provides <provide-spec>
+        查找提供给定<provide-spec>的软件包。 当人们知道文件名并想要查找哪个软件包（已安装或未安装）提供此文件时，此功能很有用。 在以下位置逐步查找<provide-spec>：
+
+        1. <provide-spec>与任何可用软件包的所有文件提供匹配：
+            $ dnf provides /usr/bin/gzip
+            gzip-1.9-9.fc29.x86_64 : The GNU data compression program
+            Matched from:
+            Filename    : /usr/bin/gzip
+
+        2.然后搜索所有可用软件包的所有提供：
+            $ dnf provides "gzip(x86-64)"
+            gzip-1.9-9.fc29.x86_64 : The GNU data compression program
+            Matched from:
+            Provide     : gzip(x86-64) = 1.9-9.fc29
+
+        3. DNF假定<provide-spec>是系统命令，在它前面加上/ usr / bin /，/ usr / sbin /前缀（一次添加一个），然后文件再次提供搜索。 由于遗留原因（未使用UsrMove的程序包），还将搜索/ bin和/ sbin前缀：
+            $ dnf provides zless
+            gzip-1.9-9.fc29.x86_64 : The GNU data compression program
+            Matched from:
+            Filename    : /usr/bin/zless
+
+            4.如果最后一步也失败，则DNF返回“错误：未找到匹配项”。
+        
+        默认情况下，此命令不会强制同步过期的元数据。 另请参见元数据同步。
+
+Reinstall Command
+    dnf [options] reinstall <package-specs>...
+        安装指定的软件包，如果某些软件包未安装或不可用，则失败（即，没有可在其中下载相同RPM的存储库）。
+
+Remove Command
+    dnf [options] remove <package-specs>...
+        从系统中删除指定的软件包以及所有软件包，具体取决于要删除的软件包。 每个<spec>可以是直接指定软件包的<package-spec>，也可以是@ <group-spec>，后者指定包含该软件包的（环境）组。 如果启用了clean_requirements_on_remove（默认设置），则还将删除不再需要的所有依赖项。
+
+    dnf [options] remove --duplicates
+        删除旧版本的重复软件包。
+
+    dnf [options] remove --oldinstallonly
+        除去旧的installonly软件包，仅保留installonly_limit最新版本。
+
+        还有一些特定的删除命令remove-n，remove-na和remove-nevra允许使用NEVRA格式指定确切的参数。
+
+    Remove Examples
+        dnf remove acpi tito
+            删除acpi和tito软件包。
+
+        dnf remove $(dnf repoquery --extras --exclude=tito,acpi)
+            删除任何存储库中不存在的程序包，但不要删除tito和acpi程序包（如果它们依赖于某些已删除的程序包，则它们可能仍会被删除）。
+
+            删除旧版本的重复软件包（相当于yum的package-cleanup --cleandups）：
+                dnf remove --duplicates
+
+Repoinfo Command
+    repolist命令的别名，提供了更详细的信息，例如dnf repolist -v。
+
+  Repolist Command
+    dnf [options] repolist [--enabled|--disabled|--all]
+        根据确切的命令列表启用，禁用或所有已知存储库。 默认列出所有启用的存储库。 使用-v选项时提供更多详细信息。
+
+        默认情况下，此命令不会强制同步过期的元数据。 另请参见元数据同步。
+
+Repoquery Command
+    dnf [options] repoquery [<select-options>] [<query-options>] [<pkg-spec>]
+        在可用的DNF存储库中搜索选定的程序包，并显示有关它们的所需信息。 对于远程存储库，它等效于rpm -q。
+
+    dnf [options] repoquery --querytags
+        提供由--queryformat repoquery选项识别的标签列表。
+
+        还有一些特定的repoquery命令repoquery-n，repoquery-na和repoquery-nevra允许以NEVRA格式指定确切的参数（不影响--whatprovides <arg>等选项的参数）。 。
+
+Select Options
+    与<pkg-spec>一起，控制在输出中显示哪些软件包。 如果给出了<pkg-spec>，则将结果包的集合限制为与规范匹配的软件包。 如果未指定<pkg-spec>，则将考虑所有软件包。
+
+    <pkg-spec>
+        NEVRA格式的软件包规范（名称[-[epoch：]版本[-release]] [。arch]）。 请参阅指定软件包。
+
+    -a, --all
+        NEVRA格式的软件包规范（名称[-[epoch：]版本[-release]] [。arch]）。 请参阅指定软件包。...
+
+    --arch <arch>[,<arch>...], --archlist <arch>[,<arch>...]
+        将结果集仅限制为选定体系结构的软件包（默认为所有体系结构）。 在某些情况下，结果受正在运行的系统的基础架构影响，因此要对与您的系统不兼容的架构运行repoquery，请使用--forcearch = <arch>选项更改基础架构。
+
+    --duplicates
+        将结果集限制为已安装的重复软件包（即，具有相同名称和体系结构的更多软件包版本）。 Installonly软件包不包括在此组中。
+
+    --unneeded
+        将结果集限制为保留已安装为依赖项的软件包，以便不再需要它们。 此开关列出了在执行dnf autoremove命令之后将要删除的软件包。
+
+    --available
+        将结果集限制为仅可用软件包（默认设置）。
+
+    --extras
+        将结果集限制为任何可用存储库中都不存在的软件包。
+
+    -f <file>, --file <file>
+        将结果集仅限制为拥有<file>的包。
+
+    --installed
+        将结果集限制为仅已安装的软件包。 配置文件中的exclude选项可能会影响结果，但是如果使用命令行选项--disableexcludes，它将确保列出所有已安装的软件包。
+
+    --installonly
+        将结果集限制为已安装的installonly软件包。
+
+    --latest-limit <number>
+        对于每个软件包名称和体系结构，将结果集限制为最新软件包的<number>个。 如果<number>为负，则跳过最新软件包的<number>。 对于负数<number>，请使用--latest-limit = <number>语法。
+
+    --recent
+        将结果集限制为最近编辑过的包。
+
+    --repo <repoid>
+        将结果集仅限制为<repoid>标识的存储库中的软件包。 可累积使用多次。
+
+    --unsatisfied
+        报告已安装的软件包之间的不满意依赖性（即缺少需求和存在的冲突）。
+
+    --upgrades
+        将结果集限制为可为某些已安装的软件包提供升级的软件包。
+
+    --userinstalled
+        将结果集限制为用户安装的软件包。 配置文件中的exclude选项可能会影响结果，但是如果使用命令行选项--disableexcludes，它将确保列出所有已安装的软件包。
+
+    --whatdepends <capability>
+        仅将结果集限制为需要，增强，推荐，建议或补充<capability>的软件包。
+
+    --whatconflicts <capability>
+        将结果集仅限制为与<capability>冲突的软件包。
+
+    --whatenhances <capability>
+        将结果集仅限于增强<capability>的程序包。 如果要列出所有依赖的软件包，请使用--whatdepends。
+
+    --whatobsoletes <capability>
+        仅将结果集限制为已淘汰<capability>的软件包。
+
+    --whatprovides <capability>
+        将结果集仅限制为提供<capability>的软件包。
+
+    --whatrecommends <capability>
+        将结果集限制为仅推荐<capability>的程序包。 如果要列出所有依赖的软件包，请使用--whatdepends。
+
+    --whatrequires <capability>
+        将结果集限制为仅需要<capability>的程序包。 如果要列出所有依赖的软件包，请使用--whatdepends。
+
+    --whatsuggests <capability>
+        将结果集仅限制为建议<capability>的软件包。 如果要列出所有依赖的软件包，请使用--whatdepends。
+
+    --whatsupplements <capability>
+        将结果集限制为仅补充<capability>的软件包。 如果要列出所有依赖的软件包，请使用--whatdepends。
+
+    --alldeps
+        此选项只能与--whatrequires或--whatdepends堆叠。 另外，它将所有需要软件包功能的软件包添加到结果集中（用作默认值）。
+
+    --exactdeps
+        此选项只能与--whatrequires或--whatdepends堆叠。 将结果集仅限制为需要--whatrequires指定的<capability>的软件包。
+
+    --srpm
+    在相应的源RPM上进行操作。
+
+Query Options
+    设置显示有关每个软件包的信息。
+
+    以下是互斥的，即最多可以指定一个。 如果未提供查询选项，则匹配的软件包将以标准NEVRA表示法显示。
+
+    -i, --info
+        显示有关软件包的详细信息。
+
+    -l, --list
+        显示包中的文件列表。
+
+    -s, --source
+        显示软件包源RPM名称。
+
+    --changelogs
+        打印软件包更改日志。
+
+    --conflicts
+        显示程序包与之冲突的功能。 与--qf“％{conflicts}。
+
+    --depends
+        程序包依赖，增强，推荐，建议或补充的显示功能。
+
+    --enhances
+        封装增强了显示功能。 与--qf“％{enhances}”“相同。
+
+    --location
+        显示可以从中下载软件包的位置。
+
+    --obsoletes
+        显示软件包已淘汰的功能。 与--qf“％{obsoletes}”相同。
+
+    --provides
+        软件包提供的显示功能。 与--qf“％{provides}”相同。
+
+    --recommends
+        软件包推荐的显示功能。 与--qf“％{recommends}”相同。
+
+    --requires
+        显示软件包依赖的功能。 与--qf“％{requires}”相同。
+
+    --requires-pre
+        显示软件包运行％pre脚本所依赖的功能。 与--qf“％{requires-pre}”相同。
+
+    --suggests
+        软件包建议的显示功能。 与--qf“％{suggests}”相同。
+
+    --supplements
+        软件包补充了显示功能。 与--qf“％{supplements}”相同。
+
+    --tree Display
+        具有以下补充选项之一指定功能的软件包的递归树：--whatrequires，--requires，--conflicts，--enhances，--Suggests，--provides，--supplements，--recommends。
+
+    --deplist
+        产生所有依赖关系的列表，以及哪些包提供给定包的那些依赖关系。 结果仅显示最新的提供程序（可以使用--verbose进行更改）。
+
+    --nvr 
+        以名称版本发布格式显示找到的软件包。 与--qf“％{name}-％{version}-％{release}”相同。
+
+    --nevra
+        以名称-epoch：version-release.architecture格式显示找到的软件包。 与--qf“％{name}-％{epoch}：％{version}-％{release}。％{arch}”（默认）相同。
+
+    --envra
+        以epoch：name-version-release.architecture格式显示找到的软件包。 与--qf“％{epoch}：％{name}-％{version}-％{release}。％{arch}”相同
+
+    --qf <format>, --queryformat <format>
+        自定义显示格式。 <format>是每个匹配包输出的字符串。 包中相应的属性将替换每次出现的％{<tag>}。 可以通过运行dnf repoquery --querytags来显示已识别标签的列表。
+
+    --recursive
+        递归查询包。 必须与--whatrequires <REQ>（与--alldeps可选，但与--exactdeps无关）或--requires <REQ> --resolve使用。
+
+    --resolve
+        解决原始包的功能。
+
+Examples
+    显示所有与光匹配的可用软件包的NEVRA *：
+        dnf repoquery 'light*'
+
+    显示与名称light *和体系结构noarch匹配的所有可用软件包的NEVRA（仅接受“ <name>。<arch>”格式的参数）：
+        dnf repoquery-na 'light*.noarch'
+
+    显示所有ligttpd软件包的要求：
+        dnf repoquery --requires lighttpd
+
+    显示提供python软件包要求的软件包：
+        dnf repoquery --requires python --resolve
+
+    显示ligttpd软件包的源rpm：
+        dnf repoquery --source lighttpd
+
+    显示拥有给定文件的软件包名称：
+        dnf repoquery --file /etc/lighttpd/lighttpd.conf
+
+    显示所有lighttpd软件包的名称，体系结构和包含的存储库：
+        dnf repoquery --queryformat '%{name}.%{arch} : %{reponame}' lighttpd
+
+    显示所有提供“网络服务器”的软件包：
+        dnf repoquery --whatprovides webserver
+
+    显示提供“ webserver”但仅适用于“ i686”体系结构的所有可用软件包：
+        dnf repoquery --whatprovides webserver --arch i686
+
+    显示重复的软件包：
+        dnf repoquery --duplicates
+
+    显示需要<provide>进行构建的源软件包：
+        dnf repoquery --disablerepo=* --enablerepo=*-source --arch=src --whatrequires <provide>
+
+  Repo-Pkgs Command
+    dnf [options] repo-pkgs
+        Repository-Packages命令的不建议使用的别名。
+
+Repository-Packages Command
+    repository-packages命令允许用户在名为<repoid>的存储库中的所有软件包之上运行命令。 但是，任何依赖项解决方案都会考虑所有已启用存储库中的程序包。 <package-name-spec>和<package-spec>规范进一步将候选者限制为仅匹配至少其中之一的那些软件包。
+
+    info子命令根据软件包与存储库的关系列出有关软件包的描述和摘要信息。 list子命令仅显示这些软件包的列表。
+
+    dnf [options] repository-packages <repoid> check-update [<package-name-spec>...]
+        非交互检查存储库中指定软件包的更新是否可用。 有可用更新时，DNF退出代码将为100，并将打印更新列表。
+
+    dnf [options] repository-packages <repoid> info [--all] [<package-name-spec>...]
+        列出所有相关的软件包。
+
+    dnf [options] repository-packages <repoid> info --installed [<package-name-spec>...]
+        列出从资源库安装的软件包。
+
+    dnf [options] repository-packages <repoid> info --available [<package-name-spec>...]
+        列出存储库中可用但系统上当前未安装的软件包。
+
+    dnf [options] repository-packages <repoid> info --extras [<package-name-specs>...]
+        列出从存储库安装的在任何存储库中都不可用的软件包。
+
+    dnf [options] repository-packages <repoid> info --obsoletes [<package-name-spec>...]
+        列出存储库中已淘汰系统上已安装软件包的软件包。
+
+    dnf [options] repository-packages <repoid> info --recent [<package-name-spec>...]
+        列出最近添加到存储库中的软件包。
+
+    dnf [options] repository-packages <repoid> info --upgrades [<package-name-spec>...]
+        列出存储库中用于升级系统上安装的软件包的软件包。
+
+    dnf [options] repository-packages <repoid> install [<package-spec>...]
+        在存储库中安装所有软件包。
+
+    dnf [options] repository-packages <repoid> list [--all] [<package-name-spec>...]
+        列出所有相关的软件包。
+
+    dnf [options] repository-packages <repoid> list --installed [<package-name-spec>...]
+        列出从资源库安装的软件包。
+
+    dnf [options] repository-packages <repoid> list --available [<package-name-spec>...]
+        列出存储库中可用但系统上当前未安装的软件包。
+
+    dnf [options] repository-packages <repoid> list --extras [<package-name-specs>...]
+        列出从存储库安装的在任何存储库中都不可用的软件包。
+
+    dnf [options] repository-packages <repoid> list --obsoletes [<package-name-spec>...]
+        列出存储库中已淘汰系统上已安装软件包的软件包。
+
+    dnf [options] repository-packages <repoid> list --recent [<package-name-spec>...]
+        列出最近添加到存储库中的软件包。
+
+    dnf [options] repository-packages <repoid> list --upgrades [<package-name-spec>...]
+        列出存储库中用于升级系统上安装的软件包的软件包。
+
+    dnf [options] repository-packages <repoid> move-to [<package-name-spec>...]
+        重新安装存储库中所有可用的软件包。
+
+    dnf [options] repository-packages <repoid> reinstall [<package-name-spec>...]
+        运行reinstall-old子命令。 如果失败，请运行move-to子命令。
+
+    dnf [options] repository-packages <repoid> reinstall-old [<package-name-spec>...]
+        重新安装所有从存储库安装的软件包，同时在存储库中可用。
+
+    dnf [options] repository-packages <repoid> remove [<package-name-spec>...]
+        从存储库中删除所有已安装的软件包以及所有软件包，具体取决于要删除的软件包。 如果启用了clean_requirements_on_remove（默认设置），还将删除不再需要的所有依赖项。
+
+    dnf [options] repository-packages <repoid> remove-or-distro-sync [<package-name-spec>...]
+        选择从存储库安装的所有软件包。 升级，降级或保留其中一个版本的版本，以匹配另一个版本中的最新版本，并根据要删除的软件包将其他版本以及所有软件包一起删除。 如果启用了clean_requirements_on_remove（默认设置），还将删除不再需要的所有依赖项。
+
+    dnf [options] repository-packages <repoid> remove-or-reinstall [<package-name-spec>...]
+        选择从存储库安装的所有软件包。 重新安装其中一个可在另一个存储库中使用的软件包，然后根据要删除的软件包将其他软件包以及所有软件包一起删除。 如果启用了clean_requirements_on_remove（默认设置），还将删除不再需要的所有依赖项。
+
+    dnf [options] repository-packages <repoid> upgrade [<package-name-spec>...]
+        将所有软件包更新为资源库中可用的最高可解析版本。
+
+    dnf [options] repository-packages <repoid> upgrade-to <package-nevr-specs>...
+        将软件包更新到存储库中可用的指定版本。 Upgrade-to是upgrade子命令不建议使用的别名。
+
+Search Command
+    dnf [options] search [--all] <keywords>...
+        在软件包元数据中搜索关键字。 关键字作为不区分大小写的子字符串进行匹配，支持全局。 默认情况下，列出与所有请求的键都匹配的软件包（AND操作）。在软件包名称和摘要中搜索关键字。 如果使用“ --all”选项，则列出与至少一个键匹配的软件包（或操作）。 另外，在包描述和URL中搜索关键字。 结果从最相关的结果到最小的结果进行排序。
+
+        默认情况下，此命令不会强制同步过期的元数据。 另请参见元数据同步。
+
+Shell Command
+    dnf [options] shell [filename]
+        打开一个交互式外壳程序，以在一次执行DNF时执行多个命令。 这些命令可以手动发出，也可以从文件传递到DNF。 这些命令与常规DNF命令行选项几乎相同。 下面记录了一些其他命令。
+
+        config [conf-option] [value]
+        ·将配置选项设置为请求的值。 如果没有给出值，则打印当前值。
+              repo [list|enable|disable] [repo-id]
+
+                     · list: list repositories and their status
+
+                     · enable: enable repository
+
+                     · disable: disable repository
+
+              transaction [list|reset|solve|run]
+
+                     · list: resolve and list the content of the transaction
+
+                     · reset: reset the transaction
+
+                     · run: resolve and run the transaction
+
+Swap Command
+    dnf [options] swap <remove-spec> <install-spec>
+        删除规格并在一次交易中安装规格。 每个<spec>可以是直接指定软件包的<package-spec>，也可以是@ <group-spec>，其指定包含该软件包的（环境）组。 DNF中的--allowerasing选项可自动解决冲突，该选项可自动提供swap命令的功能。
+
+pdate Command
+    dnf [options] update
+        不推荐使用的升级命令别名。
+
+Updateinfo Command
+    dnf [options] updateinfo [--summary|--list|--info] [<availability>] [<spec>...]
+        显示有关更新建议的信息。.
+
+        根据输出类型，DNF仅显示咨询类型（省略或--summary），咨询列表（--list）或详细信息（--info）的数量。 当-v选项与--info一起使用时，该信息会更加详细。
+
+        <availability>指定有关已安装软件包的较新版本（省略或--available）的咨询，有关已安装软件包的同等和较旧版本（-已安装）的咨询，有关可用更新版本的已安装软件包的较新版本的咨询。 （-更新）或有关已安装软件包的任何版本（--all）的建议。 在大多数情况下，--available和--updates显示相同的输出。 输出仅在咨询引用较新版本但没有启用的存储库包含任何较新版本的情况下有所不同。
+
+        如果给出并且咨询的ID，类型（错误修正，增强，安全性/秒）或软件包名称均与<spec>不匹配，则不考虑咨询。 匹配区分大小写，并且对于咨询ID和程序包名称，支持通配符。
+
+    --summary选项的输出受autocheck_running_kernel配置选项的影响。
+
+Update-Minimal Command
+    dnf [options] update-minimal
+        最小升级命令的别名已弃用。
+
+Upgrade Command
+    dnf [options] upgrade
+        将每个软件包更新为可用的最新版本，
+
+    dnf [options] upgrade <package-installed-specs>...
+        将每个指定的软件包更新为最新的可用版本。 根据需要更新依赖关系。
+
+    dnf [options] upgrade <package-nevr-specs>...
+        将软件包升级到指定版本。
+
+    dnf [options] upgrade @<spec>...
+        dnf模块更新命令的别名。
+
+    如果main obsoletes configure选项为true或--obsoletes标志存在，则dnf将在其计算中包括软件包过时的信息。 有关更多信息，请参见已淘汰。
+
+    另请参阅配置文件替换策略。
+    
+Upgrade-Minimal Command
+    dnf [options] upgrade-minimal
+        将每个软件包更新为提供错误修正，增强或安全性问题（安全性）修复的最新可用版本。
+
+    dnf [options] upgrade-minimal <package-installed-specs>...
+        将每个指定的软件包更新为提供错误修正，增强或安全性问题（安全性）修复的最新可用版本。 根据需要更新依赖关系。
+
+Update-To Command
+    dnf [options] update-to <package-nevr-specs>...
+        不推荐使用的升级命令别名。
+
+Upgrade-To Command
+    dnf [options] upgrade-to <package-nevr-specs>...
+        不推荐使用的升级命令别名。
+
+SPECIFYING PACKAGES
+    许多命令采用<package-spec>参数，该参数选择用于操作的软件包。 DNF从最常用的含义到最少的含义寻找参数的解释，即试图查看给定的规范是否符合以下模式之一（以优先级从高到低的顺序）：
+       · name.arch
+
+       · name
+
+       · name-[epoch:]version-release.arch
+
+       · name-[epoch:]version-release
+
+       · name-[epoch:]version
+
+    请注意，名称通常可以包含破折号（例如package-subpackage）。
+
+    无法根据上述模式将输入参数与现有程序包名称进行匹配，DNF会尝试查看该参数是否与现有商品相匹配。
+
+    默认情况下，如果存储库中存在所选软件包的多个版本，则使用适合给定操作的最新版本。 如果所选软件包存在多个体系结构，则将首选与系统体系结构最匹配的软件包。 名称规范区分大小写，允许使用空格字符“？，*和[并触发类似外壳的glob。 -spec>。
+
+    <package-name-spec>与<package-spec>相似，不同之处在于，从未尝试在其中进行商品匹配。
+
+    <package-installed-specs>与<package-specs>相似，区别在于它仅考虑已安装的软件包。
+
+SPECIFYING EXACT VERSIONS OF PACKAGES
+    接受<package-nevr-spec>参数的命令不仅需要包的名称，还需要其版本，发行版以及可选的体系结构。 此外，当版本部分是相关的时（即该时期不为零），版本部分之前可以带有一个时期。
+    
+SPECIFYING PROVIDES
+    命令描述中的<provide-spec>表示该命令在提供给定规范的软件包上运行。 这可以是显式提供，隐式提供（即程序包的名称）或文件提供。 该选择区分大小写，并且支持globbing。
+
+  SPECIFYING GROUPS
+    <group-spec>允许选择（环境）特定操作应进行的组。 这是一个不区分大小写的字符串（支持通配符），与组的ID，规范名称和转换为当前LC_MESSAGES语言环境的名称（如果可能）匹配。
+
+SPECIFYING MODULES
+    <module-spec>允许您选择特定操作应进行的模块或配置文件。
+
+    它采用NAME：STREAM：VERSION：CONTEXT：ARCH / PROFILE的形式，支持的部分形式如下：
+       · NAME
+
+       · NAME:STREAM
+
+       · NAME:STREAM:VERSION
+
+       · NAME:STREAM:VERSION:CONTEXT
+
+       · all above combinations with ::ARCH (e.g. NAME::ARCH)
+
+       · NAME:STREAM:VERSION:CONTEXT:ARCH
+
+       · all above combinations with /PROFILE (e.g. NAME/PROFILE)
+
+    如果未指定流，则按此顺序使用启用的流或默认流。 如果未指定配置文件，则使用系统默认配置文件或“默认”配置文件。
+
+SPECIFYING TRANSACTIONS
+    <transaction-spec>可以是几种形式之一。 如果是整数，则指定交易ID。 指定last与指定最近交易的ID相同。 最后一种形式是last- <offset>，其中<offset>是一个正整数。 它指定最近事务之前的第偏移量事务。
+
+METADATA SYNCHRONIZATION
+    DNF的正确操作取决于能否从所有已启用的存储库中访问最新数据，但是在每次操作中联系远程镜像都会大大降低速度，并降低客户端和存储库提供者的带宽。 DNF使用metadata_expire（请参见dnf.conf（5））存储库配置选项来确定是否应重新同步存储库数据的特定本地副本。 至关重要的是，存储库提供者必须正确设置该选项，即确保该值可以确保如果特定的元数据在时间T上在服务器上可用，则它引用的所有程序包仍然可以在时间T上从服务器下载。 + meta_expire。
+
+    为了进一步减少带宽负载，某些具有最新元数据并不重要的命令（例如list命令）不会查看存储库是否已过期以及用户帐户本地可用的存储库的任何版本。 ，它将被使用。 对于非root用户使用，另请参阅--cacheonly开关。 请注意，在所有情况下，用户都可以使用--refresh开关强制同步所有已启用的存储库。
+
+CONFIGURATION FILES REPLACEMENT POLICY
+    更新的软件包可以将旧的修改后的配置文件替换为新的软件包，或者保留较旧的文件。 实际上，这两个文件都没有被替换。 对于有冲突的RPM，原始名称使用附加的后缀。 交易后哪个文件应保留真实名称不受包管理器控制，而是由每个包本身根据包装指南指定。
+
+Return values:
+· 0  : Operation was successful.
+· 1  : An error occurred, which was handled by dnf.
+· 3  : An unknown unhandled error occurred during operation.
+· 100: See check-update
+· 200: There was a problem with acquiring or releasing of locks.
+
+FILES
+       Cache Files
+              /var/cache/dnf
+
+       Main Configuration
+              /etc/dnf/dnf.conf
+
+       Repository
+              /etc/yum.repos.d/
+
+SEE ALSO
+       · dnf.conf(5), DNF Configuration Reference
+
+       · dnf.plugin.*(8), assorted DNF plugins that might be installed on the system.
+
+       · DNF project homepage (https://github.com/rpm-software-management/dnf/)
+
+       · How to report a bug (https://github.com/rpm-software-management/dnf/wiki/Bug-Reporting)
+
+       · YUM project homepage (http://yum.baseurl.org/)
+
+AUTHOR
+       See AUTHORS in DNF source distribution.
+
+COPYRIGHT
+       2012-2019, Red Hat, Licensed under GPLv2+
+
+4.2.7         Nov 12, 2019          DNF(8)
+
+作者：远风
+邮箱：zki@163.com
+网址：www.linuxcmd.com.cn
